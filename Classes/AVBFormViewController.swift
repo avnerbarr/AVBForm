@@ -10,78 +10,145 @@ import UIKit
 
 
 class AVBFormViewController: UIViewController {
+    let tableView = AVBFormTableView()
+    var dataSource : AVBFormDataSource?
+    override func loadView() {
+        self.view = tableView
+        tableView.registerClass(AVBFormTableViewCell.self, forCellReuseIdentifier: AVBFormTableView.CellIdentifiers.cell1.identifier)
+        tableView.registerClass(AVBFormTableViewCell.self, forCellReuseIdentifier: AVBFormTableView.CellIdentifiers.cell2.identifier)
+        tableView.registerClass(AVBInlineTextCell.self, forCellReuseIdentifier: AVBFormTableView.CellIdentifiers.text.identifier)
 
-    let form : AVBForm
-    let tableView = AVBFormTableView(frame: CGRectZero, style: UITableViewStyle.Plain)
-    init(form : AVBForm) {
-        self.form = form
-        super.init(nibName: nil, bundle: nil)
+    }
+    deinit {
+        NSNotificationCenter.defaultCenter().removeObserver(self)
+    }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.tableView.frame = self.view.bounds
         
-    }
-
-    required init(coder aDecoder: NSCoder) {
-        self.form = AVBForm(screens : [AVBFormStep]()) // empty form
-        super.init(coder: aDecoder)
+        func schemes () -> [AVBComponent] {
+            var arrayScheme = AVBMultiSelectComponent(
+                items: [
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "first"
+                    ),
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "Second"
+                    ),
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "Third"
+                    ),
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "Fourth",
+                        selected : true
+                    )
+                ]
+            )
+            arrayScheme.title = "Selection Group 1"
+            
+            var arrayScheme2 = AVBRadioComponent(
+                items: [
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "first"
+                    ),
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "Second"
+                    ),
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "Third"
+                    ),
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "Fourth"
+                    ),
+                ]
+            )
+            arrayScheme2.title = "Selection Group 2"
+            return [arrayScheme,arrayScheme2]
+        }
+        
+        
+        var firstGroup = AVBComponentGroup(title : "Group 1", schemes : schemes())
+        var secondGroup = AVBComponentGroup(title : "Group 1", schemes : schemes())
+        
+        var scheme = AVBInlineTextComponent()
+        scheme.title = "Insert text"
+        var thirdGroup = AVBComponentGroup(title: nil, schemes: [scheme])
+        var form = AVBForm(schemes : [firstGroup,secondGroup,thirdGroup])
+        dataSource = AVBFormDataSource(tableView: tableView, form: form)
+        tableView.dataSource = dataSource
+        tableView.delegate = dataSource
     }
     
-    func setup() {
-        tableView.frame = self.view.bounds
-        tableView.autoresizingMask = UIViewAutoresizing.FlexibleHeight | UIViewAutoresizing.FlexibleWidth
-        self.view.addSubview(tableView)
-    }
-    
-    var controller : AVBFormStepController?
-    override func viewWillAppear(animated: Bool) {
-        controller = AVBFormStepController()
-        controller!.tableView = self.tableView
-        controller!.step = form.screens.first
-        controller!.reload()
-    }
-
 }
 
-
-class AVBFormStepController : NSObject, UITableViewDataSource {
-    weak var tableView : AVBFormTableView?
-    var step : AVBFormStep?
-    func reload() {
-        self.tableView?.reloadData()
+@objc class AVBFormDataSource : NSObject, UITableViewDataSource, UITableViewDelegate, AVBFormProtocol {
+    private weak var tableView : AVBFormTableView!
+    private(set) var form : AVBForm!
+    init(tableView : AVBFormTableView, form : AVBForm) {
+        super.init()
+        self.tableView = tableView
+        self.form = form
+        self.form.delegate = self
+        tableView.keyboardDismissMode = UIScrollViewKeyboardDismissMode.Interactive
     }
-    
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return step?.sections.count ?? 0
+        return form.schemes.count
+    }
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        return self.form[indexPath.section]!.cellForRowAtIndex(indexPath, tableView: self.tableView)!
     }
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        var section = step?.sections[section]
-        return section?.formItems.count ?? 0
+        if let sec = self.form[section] {
+            return sec.numberOfRows
+        }
+        return 0
     }
-    
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        return (tableView as! AVBFormTableView).dequeueReusableCellWithIdentifier(AVBFormTableView.CellStyle.kTextCell)
+    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return self.form[section]?.title
     }
-}
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        self.form[indexPath.section]?.didSelectRowAtIndexPath(tableView as! AVBFormTableView, indexPath: indexPath)
+    }
+    func needsGroupReload(form : AVBForm , group : AVBComponentGroup) {
+        var index = (form.schemes as NSArray).indexOfObject(group)
+        self.tableView.reloadSections(NSIndexSet(index: index), withRowAnimation: UITableViewRowAnimation.None)
+    }
 
+}
 class AVBFormTableView : UITableView {
-    enum CellStyle : String{
-        case kTextCell   = "kTextCell"
-        case kNumberCell = "kNumberCell"
-        case kSelectCell = "kSelectCell"
-    }
-
-    override init(frame: CGRect, style: UITableViewStyle) {
-        super.init(frame: frame, style: style)
-        self.registerClass(UITableViewCell.self, forCellReuseIdentifier: CellStyle.kTextCell.rawValue)
-        self.registerClass(UITableViewCell.self, forCellReuseIdentifier: CellStyle.kNumberCell.rawValue)
-        self.registerClass(UITableViewCell.self, forCellReuseIdentifier: CellStyle.kSelectCell.rawValue)
-    }
-
-    func dequeueReusableCellWithIdentifier(identifier: CellStyle) -> UITableViewCell {
-        return self.dequeueReusableCellWithIdentifier(identifier.rawValue) as! UITableViewCell
+    var form : AVBForm?  {
+        didSet {
+            self.reloadData()
+        }
     }
     
-    required init(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+    enum CellIdentifiers {
+        case cell1
+        case cell2
+        case text
+        var identifier : String {
+            get {
+                switch self {
+                case cell1:
+                    return "cell1"
+                case cell2:
+                    return "cell2"
+                case text:
+                    return "text"
+                }
+
+            }
+        }
+
     }
+    
+    
 }
-
-

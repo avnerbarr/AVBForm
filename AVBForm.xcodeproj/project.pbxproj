@@ -13,7 +13,7 @@
 		8518365B1AF8F08800F73D90 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8518365A1AF8F08800F73D90 /* Images.xcassets */; };
 		8518365E1AF8F08800F73D90 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8518365C1AF8F08800F73D90 /* LaunchScreen.xib */; };
 		8518366A1AF8F08800F73D90 /* AVBFormTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 851836691AF8F08800F73D90 /* AVBFormTests.m */; };
-		851836751AF8F0E600F73D90 /* AVBFormItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836741AF8F0E600F73D90 /* AVBFormItem.swift */; };
+		851836751AF8F0E600F73D90 /* AVBForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836741AF8F0E600F73D90 /* AVBForm.swift */; };
 		851836771AFA019800F73D90 /* AVBFormViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836761AFA019800F73D90 /* AVBFormViewController.swift */; };
 		851836791AFA0B1000F73D90 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836781AFA0B1000F73D90 /* ViewController.swift */; };
 /* End PBXBuildFile section */
@@ -41,7 +41,7 @@
 		851836681AF8F08800F73D90 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		851836691AF8F08800F73D90 /* AVBFormTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AVBFormTests.m; sourceTree = "<group>"; };
 		851836731AF8F0E500F73D90 /* AVBForm-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AVBForm-Bridging-Header.h"; sourceTree = "<group>"; };
-		851836741AF8F0E600F73D90 /* AVBFormItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVBFormItem.swift; sourceTree = "<group>"; };
+		851836741AF8F0E600F73D90 /* AVBForm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVBForm.swift; sourceTree = "<group>"; };
 		851836761AFA019800F73D90 /* AVBFormViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AVBFormViewController.swift; path = Classes/AVBFormViewController.swift; sourceTree = "<group>"; };
 		851836781AFA0B1000F73D90 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -67,8 +67,8 @@
 		851836411AF8F08800F73D90 = {
 			isa = PBXGroup;
 			children = (
-				851836741AF8F0E600F73D90 /* AVBFormItem.swift */,
 				851836761AFA019800F73D90 /* AVBFormViewController.swift */,
+				851836741AF8F0E600F73D90 /* AVBForm.swift */,
 				851836781AFA0B1000F73D90 /* ViewController.swift */,
 				8518364C1AF8F08800F73D90 /* AVBForm */,
 				851836661AF8F08800F73D90 /* AVBFormTests */,
@@ -227,7 +227,7 @@
 			files = (
 				851836791AFA0B1000F73D90 /* ViewController.swift in Sources */,
 				851836771AFA019800F73D90 /* AVBFormViewController.swift in Sources */,
-				851836751AF8F0E600F73D90 /* AVBFormItem.swift in Sources */,
+				851836751AF8F0E600F73D90 /* AVBForm.swift in Sources */,
 				851836531AF8F08800F73D90 /* AppDelegate.m in Sources */,
 				851836501AF8F08800F73D90 /* main.m in Sources */,
 			);
