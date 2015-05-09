@@ -12,6 +12,7 @@ import UIKit
 class AVBFormViewController: UIViewController {
     let tableView = AVBFormTableView()
     var dataSource : AVBFormDataSource?
+    var form : AVBForm?
     override func loadView() {
         self.view = tableView
     }
@@ -22,8 +23,8 @@ class AVBFormViewController: UIViewController {
         super.viewDidLoad()
         self.tableView.frame = self.view.bounds
         
-        func radio () -> AVBRadioComponent {
-            var arrayScheme2 = AVBRadioComponent(
+        func radio () -> AVBInlineRadioComponent {
+            var radio = AVBInlineRadioComponent(
                 items: [
                     AVBArrayItem(
                         id : "kuku:",
@@ -43,27 +44,52 @@ class AVBFormViewController: UIViewController {
                     ),
                 ]
             )
-            arrayScheme2.title = "Radio Group"
-            return arrayScheme2
+            radio.title = "Radio Group"
+            radio.stateChanged = {(component : AVBComponent,state : AVBState) in
+                if let component = component as? AVBInlineRadioComponent {
+                    for item in component.arrayItems {
+                        println(item.title! + " " + item.id! + " " + item.selected.description )
+                    }
+                    
+                    if let parent = component.parent {
+                        var newRadio = AVBInlineRadioComponent(
+                            items: [
+                                AVBArrayItem(
+                                    id : "kuku:",
+                                    title : "1"
+                                ),
+                                AVBArrayItem(
+                                    id : "kuku:",
+                                    title : "2"
+                                )
+                            ]
+                        )
+                        newRadio.title = "New Radio"
+                        parent.replace(component, newComponent: newRadio)
+                    }
+                }
+                println("Changed")
+            }
+            return radio
         }
-        func multiSelect() -> AVBMultiSelectComponent {
-            var arrayScheme = AVBMultiSelectComponent(
+        func multiSelect() -> AVBInlineMultiSelectComponent {
+            var arrayScheme = AVBInlineMultiSelectComponent(
                 items: [
                     AVBArrayItem(
                         id : "kuku:",
-                        title : "first"
+                        title : "A"
                     ),
                     AVBArrayItem(
                         id : "kuku:",
-                        title : "Second"
+                        title : "B"
                     ),
                     AVBArrayItem(
                         id : "kuku:",
-                        title : "Third"
+                        title : "C"
                     ),
                     AVBArrayItem(
                         id : "kuku:",
-                        title : "Fourth",
+                        title : "D",
                         selected : true
                     )
                 ]
@@ -71,10 +97,9 @@ class AVBFormViewController: UIViewController {
             arrayScheme.title = "Multi Select Group"
             return arrayScheme
         }
-        func accessory () -> AVBAccessoryViewComponent {
-            var accessory = AVBAccessoryViewComponent(style: .Date)
+        func accessory () -> AVBDateAccessoryComponent {
+            var accessory = AVBDateAccessoryComponent()
             accessory.title = "Accessory"
-            accessory.style = .Date
             return accessory
         }
         
@@ -89,56 +114,16 @@ class AVBFormViewController: UIViewController {
         var accordione = AVBAccordioneComponent(component: radio())
         accordione.title = "Accordione"
         var forthGroup = AVBComponentGroup(title: "Accordione Group", schemes: [accordione,accessory()])
-        var form = AVBForm(schemes : [firstGroup,secondGroup,thirdGroup,forthGroup])
-        dataSource = AVBFormDataSource(tableView: tableView, form: form)
-        tableView.dataSource = dataSource
-        tableView.delegate = dataSource
+        self.form = AVBForm(groups : [firstGroup,secondGroup,thirdGroup,forthGroup],tableView : tableView)
     }
     
 }
 
-@objc class AVBFormDataSource : NSObject, UITableViewDataSource, UITableViewDelegate, AVBFormProtocol {
-    private weak var tableView : AVBFormTableView!
-    private(set) var form : AVBForm!
-    init(tableView : AVBFormTableView, form : AVBForm) {
-        super.init()
-        self.tableView = tableView
-        self.form = form
-        self.form.delegate = self
-        tableView.keyboardDismissMode = UIScrollViewKeyboardDismissMode.Interactive
-    }
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return form.schemes.count
-    }
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        return self.form[indexPath.section]!.cellForRowAtIndex(indexPath, tableView: self.tableView)!
-    }
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if let sec = self.form[section] {
-            return sec.numberOfRows
-        }
-        return 0
-    }
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return self.form[section]?.title
-    }
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.form[indexPath.section]?.didSelectRowAtIndexPath(tableView as! AVBFormTableView, indexPath: indexPath)
-    }
-    
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return self.form[indexPath.section]?.heightForRowAtIndexPath(indexPath, tableView: tableView as! AVBFormTableView) ?? 44.0
-    }
-    func needsGroupReload(form : AVBForm , group : AVBComponentGroup) {
-        var index = (form.schemes as NSArray).indexOfObject(group)
-        self.tableView.reloadSections(NSIndexSet(index: index), withRowAnimation: UITableViewRowAnimation.Automatic)
-    }
-
-}
 class AVBFormTableView : UITableView {
     init() {
         super.init(frame: CGRectZero, style: UITableViewStyle.Grouped)
         var tableView = self
+        keyboardDismissMode = UIScrollViewKeyboardDismissMode.Interactive
         for enumVal in CellIdentifiers.values {
             tableView.registerClass(enumVal.cellClass, forCellReuseIdentifier: enumVal.identifier)
         }

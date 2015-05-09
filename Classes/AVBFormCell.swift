@@ -10,6 +10,14 @@ import Foundation
 import UIKit
 
 class AVBFormTableViewCell : UITableViewCell {
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        super.init(style: UITableViewCellStyle.Value1, reuseIdentifier: reuseIdentifier)
+    }
+
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        fatalError("init(coder:) has not been implemented")
+    }
     override func prepareForReuse() {
         accessoryType = .None
         textLabel?.text = nil

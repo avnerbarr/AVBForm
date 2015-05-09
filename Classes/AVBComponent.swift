@@ -15,8 +15,14 @@ protocol AVBComponentGroupParentProtocol {
     func needsReload(AVBComponent)
     func needsUpdateRowCount(AVBComponent)
 }
+
+struct AVBState {
+    
+}
+
 class AVBComponentGroup : AVBComponentGroupParentProtocol {
     var title : String?
+    var identifier : String?
     weak var form : AVBForm?
     typealias InternalIndexMap = (scheme : AVBComponent,index : Int)
     
@@ -40,9 +46,11 @@ class AVBComponentGroup : AVBComponentGroupParentProtocol {
     private var _internalIndexMap = [Int : InternalIndexMap]()
     private var _numberOfRequiredRows = 0
     init(title : String?,schemes : [AVBComponent]) {
+
         self.title = title
         self.schemes = schemes
         updateInternals()
+        
     }
     var numberOfRows : Int {
         get {
@@ -83,6 +91,14 @@ class AVBComponentGroup : AVBComponentGroupParentProtocol {
         }
     }
     
+    func replace(toReplace : AVBComponent, newComponent : AVBComponent) {
+        var components = self.schemes
+        if let index = find(self.schemes,toReplace) {
+            components[index] = newComponent
+            self.schemes = components
+            self.form?.delegate?.needsGroupReload(self.form!, group: self)
+        }
+    }
     //MARK: AVBComponentGroupParentProtocol
     func needsReload(section : AVBComponent) {
         self.form?.delegate?.needsGroupReload(self.form!, group: self)
@@ -102,10 +118,14 @@ protocol AVBComponentGroupProtocol {
     func heightForRowAtIndex(index : Int) -> CGFloat
 }
 
-class AVBComponent :  AVBComponentGroupProtocol {
+typealias AVBStateClosure = (component : AVBComponent,state : AVBState) -> ()
+class AVBComponent :   AVBComponentGroupProtocol {
+
     var title : String?
     var labelStyle = LabelStyle.Normal
     var mandatory = false
+    var identifier : String?
+    var stateChanged : AVBStateClosure?
     enum LabelStyle {
         case Normal
         case Special
@@ -123,11 +143,19 @@ class AVBComponent :  AVBComponentGroupProtocol {
         return AVBFormTableView.CellIdentifiers.Cell1
     }
     func prepareCell(cell : AVBFormTableViewCell, index : Int) {}
-    func didSelectCell(cell : AVBFormTableViewCell, index : Int) {}
+    func didSelectCell(cell : AVBFormTableViewCell, index : Int) {
+        
+    }
     func heightForRowAtIndex(index : Int) -> CGFloat {return 44.0}
 }
 
+extension AVBComponent : Equatable {
+    
+}
 
+func ==(lhs: AVBComponent, rhs: AVBComponent) -> Bool {
+    return lhs === rhs
+}
 struct AVBArrayItem {
     var id : String?
     var title : String?
@@ -144,7 +172,7 @@ struct AVBArrayItem {
 }
 
 
-class AVBArrayComponent : AVBComponent {
+class AVBInlineArrayComponent : AVBComponent {
     var arrayItems : [AVBArrayItem]
     
     init(items : [AVBArrayItem]) {
@@ -178,6 +206,9 @@ class AVBArrayComponent : AVBComponent {
         if index == 0 {
             return
         }
+        if cell.isFirstResponder() == true {
+            cell.resignFirstResponder()
+        }
         var item = self.arrayItems[index - 1]
         item.selected = !item.selected
         self.arrayItems[index - 1] = item
@@ -185,11 +216,11 @@ class AVBArrayComponent : AVBComponent {
     }
 }
 
-class AVBMultiSelectComponent : AVBArrayComponent {
+class AVBInlineMultiSelectComponent : AVBInlineArrayComponent {
     // inherited from parent
 }
 
-class AVBRadioComponent : AVBArrayComponent {
+class AVBInlineRadioComponent : AVBInlineArrayComponent {
     override func didSelectCell(cell : AVBFormTableViewCell, index : Int) {
         if index == 0 {
             return
@@ -209,6 +240,9 @@ class AVBRadioComponent : AVBArrayComponent {
         self.arrayItems = array
         if needsReload {
             self.needsReload()
+        }
+        if let state = self.stateChanged {
+            state(component: self, state: AVBState())
         }
     }
     
@@ -321,47 +355,9 @@ class AVBAccordioneComponent : AVBCompositeComponent {
     }
 }
 
-class AVBAccessoryDateComponent : AVBComponent {
-    override func numberOfRows() -> Int {
-        return 1
-    }
-    override func prepareCell(cell: AVBFormTableViewCell, index: Int) {
-        if let cell = cell as? AVBFormAccessoryCell {
-     
-        }
-        cell.textLabel?.text = self.title
-        
-    }
-    override func didSelectCell(cell: AVBFormTableViewCell, index: Int) {
-        cell.becomeFirstResponder()
-    }
-    override func cellIdentifierForIndex(index: Int) -> AVBFormTableView.CellIdentifiers {
-        return AVBFormTableView.CellIdentifiers.Accessory
-    }
-}
-class AVBAccessoryViewComponent : AVBComponent , AVBFormAccessoryCellDelegate /*, UIPickerViewDataSource, UIPickerViewDelegate*/ {
-    enum Style {
-        case Date
-        case SingleSelect([String])
-        var view : UIView {
-            get {
-                switch self {
-                case .Date:
-                    return UIDatePicker()
-                case let .SingleSelect(vals):
-                    for val in vals {
-                        
-                    }
-                    return UIPickerView()
-                }
-            }
-        }
-    }
-
-    init(style : Style) {
-        self.style = style
-    }
-    var style : Style?
+class AVBDateAccessoryComponent : AVBComponent , AVBFormAccessoryCellDelegate /*, UIPickerViewDataSource, UIPickerViewDelegate*/ {
+    
+    var date : NSDate?
     override func numberOfRows() -> Int {
         return 1
     }
@@ -370,39 +366,25 @@ class AVBAccessoryViewComponent : AVBComponent , AVBFormAccessoryCellDelegate /*
             cell.accessoryDelegate = self
         }
         cell.textLabel?.text = self.title
-        
+        cell.detailTextLabel?.text = date?.description
     }
+    
     override func didSelectCell(cell: AVBFormTableViewCell, index: Int) {
         cell.becomeFirstResponder()
     }
+    
     override func cellIdentifierForIndex(index: Int) -> AVBFormTableView.CellIdentifiers {
         return AVBFormTableView.CellIdentifiers.Accessory
     }
     
     func accessoryView(AVBFormAccessoryCell) -> UIView? {
-        if style == nil {
-            return nil
-        }
-        let view = style?.view
-        if let view = view as? UIDatePicker {
-            view.addTarget(self, action: "didChangeValue", forControlEvents: UIControlEvents.ValueChanged)
-            return view
-        }
-        if let view = view as? UIPickerView {
-//            view.dataSource = self
-//            view.delegate = self
-        }
-
-        return style?.view
+        let view = UIDatePicker()
+        view.addTarget(self, action: "datePickerDidChangeValue:", forControlEvents: UIControlEvents.ValueChanged)
+        return view
     }
     
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
-        return 1
+    @objc func datePickerDidChangeValue(picker : UIDatePicker) {
+        date = picker.date
+        self.needsReload()
     }
-    
-    // returns the # of rows in each component..
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return 10
-    }
-    
 }
