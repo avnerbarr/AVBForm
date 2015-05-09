@@ -14,10 +14,6 @@ class AVBFormViewController: UIViewController {
     var dataSource : AVBFormDataSource?
     override func loadView() {
         self.view = tableView
-        tableView.registerClass(AVBFormTableViewCell.self, forCellReuseIdentifier: AVBFormTableView.CellIdentifiers.cell1.identifier)
-        tableView.registerClass(AVBFormTableViewCell.self, forCellReuseIdentifier: AVBFormTableView.CellIdentifiers.cell2.identifier)
-        tableView.registerClass(AVBInlineTextCell.self, forCellReuseIdentifier: AVBFormTableView.CellIdentifiers.text.identifier)
-
     }
     deinit {
         NSNotificationCenter.defaultCenter().removeObserver(self)
@@ -26,7 +22,31 @@ class AVBFormViewController: UIViewController {
         super.viewDidLoad()
         self.tableView.frame = self.view.bounds
         
-        func schemes () -> [AVBComponent] {
+        func radio () -> AVBRadioComponent {
+            var arrayScheme2 = AVBRadioComponent(
+                items: [
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "first"
+                    ),
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "Second"
+                    ),
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "Third"
+                    ),
+                    AVBArrayItem(
+                        id : "kuku:",
+                        title : "Fourth"
+                    ),
+                ]
+            )
+            arrayScheme2.title = "Radio Group"
+            return arrayScheme2
+        }
+        func multiSelect() -> AVBMultiSelectComponent {
             var arrayScheme = AVBMultiSelectComponent(
                 items: [
                     AVBArrayItem(
@@ -48,40 +68,28 @@ class AVBFormViewController: UIViewController {
                     )
                 ]
             )
-            arrayScheme.title = "Selection Group 1"
-            
-            var arrayScheme2 = AVBRadioComponent(
-                items: [
-                    AVBArrayItem(
-                        id : "kuku:",
-                        title : "first"
-                    ),
-                    AVBArrayItem(
-                        id : "kuku:",
-                        title : "Second"
-                    ),
-                    AVBArrayItem(
-                        id : "kuku:",
-                        title : "Third"
-                    ),
-                    AVBArrayItem(
-                        id : "kuku:",
-                        title : "Fourth"
-                    ),
-                ]
-            )
-            arrayScheme2.title = "Selection Group 2"
-            return [arrayScheme,arrayScheme2]
+            arrayScheme.title = "Multi Select Group"
+            return arrayScheme
+        }
+        func accessory () -> AVBAccessoryViewComponent {
+            var accessory = AVBAccessoryViewComponent(style: .Date)
+            accessory.title = "Accessory"
+            accessory.style = .Date
+            return accessory
         }
         
         
-        var firstGroup = AVBComponentGroup(title : "Group 1", schemes : schemes())
-        var secondGroup = AVBComponentGroup(title : "Group 1", schemes : schemes())
+        var firstGroup = AVBComponentGroup(title : "Group 1", schemes : [multiSelect(),radio()])
+        var secondGroup = AVBComponentGroup(title : "Group 1", schemes : [multiSelect(),radio()])
         
         var scheme = AVBInlineTextComponent()
         scheme.title = "Insert text"
         var thirdGroup = AVBComponentGroup(title: nil, schemes: [scheme])
-        var form = AVBForm(schemes : [firstGroup,secondGroup,thirdGroup])
+        
+        var accordione = AVBAccordioneComponent(component: radio())
+        accordione.title = "Accordione"
+        var forthGroup = AVBComponentGroup(title: "Accordione Group", schemes: [accordione,accessory()])
+        var form = AVBForm(schemes : [firstGroup,secondGroup,thirdGroup,forthGroup])
         dataSource = AVBFormDataSource(tableView: tableView, form: form)
         tableView.dataSource = dataSource
         tableView.delegate = dataSource
@@ -117,13 +125,27 @@ class AVBFormViewController: UIViewController {
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         self.form[indexPath.section]?.didSelectRowAtIndexPath(tableView as! AVBFormTableView, indexPath: indexPath)
     }
+    
+    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        return self.form[indexPath.section]?.heightForRowAtIndexPath(indexPath, tableView: tableView as! AVBFormTableView) ?? 44.0
+    }
     func needsGroupReload(form : AVBForm , group : AVBComponentGroup) {
         var index = (form.schemes as NSArray).indexOfObject(group)
-        self.tableView.reloadSections(NSIndexSet(index: index), withRowAnimation: UITableViewRowAnimation.None)
+        self.tableView.reloadSections(NSIndexSet(index: index), withRowAnimation: UITableViewRowAnimation.Automatic)
     }
 
 }
 class AVBFormTableView : UITableView {
+    init() {
+        super.init(frame: CGRectZero, style: UITableViewStyle.Grouped)
+        var tableView = self
+        for enumVal in CellIdentifiers.values {
+            tableView.registerClass(enumVal.cellClass, forCellReuseIdentifier: enumVal.identifier)
+        }
+    }
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
     var form : AVBForm?  {
         didSet {
             self.reloadData()
@@ -131,20 +153,51 @@ class AVBFormTableView : UITableView {
     }
     
     enum CellIdentifiers {
-        case cell1
-        case cell2
-        case text
+        case Cell1
+        case Cell2
+        case Text
+        case DateTime
+        case RadioCell
+        case RadioHeader
+        case Accessory
+        static var values : [CellIdentifiers] { get {return [CellIdentifiers.Cell1,CellIdentifiers.Cell2,CellIdentifiers.Text,CellIdentifiers.DateTime,CellIdentifiers.RadioCell,CellIdentifiers.RadioHeader,CellIdentifiers.Accessory]}}
         var identifier : String {
             get {
                 switch self {
-                case cell1:
+                case Cell1:
                     return "cell1"
-                case cell2:
+                case Cell2:
                     return "cell2"
-                case text:
+                case Text:
                     return "text"
+                case .DateTime:
+                    return "DateTime"
+                case .RadioCell:
+                    return "RadioCell"
+                case .RadioHeader:
+                    return "RadioHeader"
+                case .Accessory:
+                    return "Accessory"
                 }
 
+            }
+        }
+        var cellClass : AnyClass {
+            get {
+                switch self {
+                case .Cell1, .Cell2:
+                    return AVBFormTableViewCell.self
+                case .Text:
+                    return AVBInlineTextCell.self
+                case .DateTime:
+                    return AVBFormTableViewCell.self
+                case .RadioCell:
+                    return AVBFormTableViewCell.self
+                case .RadioHeader:
+                    return AVBFormRadioHeaderCell.self
+                case .Accessory:
+                    return AVBFormAccessoryCell.self
+                }
             }
         }
 

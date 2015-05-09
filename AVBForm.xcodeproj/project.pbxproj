@@ -16,6 +16,8 @@
 		851836751AF8F0E600F73D90 /* AVBForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836741AF8F0E600F73D90 /* AVBForm.swift */; };
 		851836771AFA019800F73D90 /* AVBFormViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836761AFA019800F73D90 /* AVBFormViewController.swift */; };
 		851836791AFA0B1000F73D90 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836781AFA0B1000F73D90 /* ViewController.swift */; };
+		8518367B1AFBFD6B00F73D90 /* AVBComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8518367A1AFBFD6B00F73D90 /* AVBComponent.swift */; };
+		8518367D1AFDF06300F73D90 /* AVBFormCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8518367C1AFDF06300F73D90 /* AVBFormCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +46,8 @@
 		851836741AF8F0E600F73D90 /* AVBForm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVBForm.swift; sourceTree = "<group>"; };
 		851836761AFA019800F73D90 /* AVBFormViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AVBFormViewController.swift; path = Classes/AVBFormViewController.swift; sourceTree = "<group>"; };
 		851836781AFA0B1000F73D90 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		8518367A1AFBFD6B00F73D90 /* AVBComponent.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; fileEncoding = 4; name = AVBComponent.swift; path = Classes/AVBComponent.swift; sourceTree = "<group>"; };
+		8518367C1AFDF06300F73D90 /* AVBFormCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AVBFormCell.swift; path = Classes/AVBFormCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,7 +72,9 @@
 			isa = PBXGroup;
 			children = (
 				851836761AFA019800F73D90 /* AVBFormViewController.swift */,
+				8518367A1AFBFD6B00F73D90 /* AVBComponent.swift */,
 				851836741AF8F0E600F73D90 /* AVBForm.swift */,
+				8518367C1AFDF06300F73D90 /* AVBFormCell.swift */,
 				851836781AFA0B1000F73D90 /* ViewController.swift */,
 				8518364C1AF8F08800F73D90 /* AVBForm */,
 				851836661AF8F08800F73D90 /* AVBFormTests */,
@@ -226,7 +232,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				851836791AFA0B1000F73D90 /* ViewController.swift in Sources */,
+				8518367B1AFBFD6B00F73D90 /* AVBComponent.swift in Sources */,
 				851836771AFA019800F73D90 /* AVBFormViewController.swift in Sources */,
+				8518367D1AFDF06300F73D90 /* AVBFormCell.swift in Sources */,
 				851836751AF8F0E600F73D90 /* AVBForm.swift in Sources */,
 				851836531AF8F08800F73D90 /* AppDelegate.m in Sources */,
 				851836501AF8F08800F73D90 /* main.m in Sources */,
@@ -431,6 +439,7 @@
 				8518366F1AF8F08800F73D90 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		851836701AF8F08800F73D90 /* Build configuration list for PBXNativeTarget "AVBFormTests" */ = {
 			isa = XCConfigurationList;
@@ -439,6 +448,7 @@
 				851836721AF8F08800F73D90 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
