@@ -30,7 +30,7 @@ class AVBComponent :   AVBComponentSectionProtocol,AVBValidatable {
     /**
     Mark if this value is required
     */
-    var mandatory = false
+    var mandatory = true
     /**
     This is for API user - wishing to mark this component
     */
@@ -52,7 +52,7 @@ class AVBComponent :   AVBComponentSectionProtocol,AVBValidatable {
     }
     //MARK: AVBComponentGroupProtocol
     func cellIdentifierForIndex(index : Int) -> AVBFormTableView.CellIdentifiers {
-        return AVBFormTableView.CellIdentifiers.Cell1
+        return AVBFormTableView.CellIdentifiers.Simple
     }
     func prepareCell(cell : AVBFormTableViewCell, index : Int) {}
     func didSelectCell(cell : AVBFormTableViewCell, index : Int) {}
@@ -89,7 +89,7 @@ class AVBFullScreenComponent : AVBComponent {
         return 1
     }
     override func cellIdentifierForIndex(index: Int) -> AVBFormTableView.CellIdentifiers {
-        return AVBFormTableView.CellIdentifiers.Cell1
+        return AVBFormTableView.CellIdentifiers.Simple
     }
     override func prepareCell(cell: AVBFormTableViewCell, index: Int) {
         cell.textLabel?.text = self.title
@@ -105,6 +105,10 @@ class AVBFullScreenComponent : AVBComponent {
         return childComponent.isValid()
     }
 }
+
+//MARK:-
+//MARK: AVBArrayItem
+
 /**
 *  Represents a choice item
 */
@@ -154,17 +158,16 @@ class AVBInlineArrayComponent : AVBComponent {
     }
     //MARK: AVBComponentGroupProtocol
     override func cellIdentifierForIndex(index : Int) -> AVBFormTableView.CellIdentifiers {
-        return AVBFormTableView.CellIdentifiers.Cell1
+        return AVBFormTableView.CellIdentifiers.Simple
     }
     override func prepareCell(cell : AVBFormTableViewCell, index : Int) {
         if index == 0 {
-            cell.textLabel?.text = self.title
-            cell.accessoryType = UITableViewCellAccessoryType.None
+            cell.model = AVBFormCellModel(text : self.title,detailText : nil, accesoryType : UITableViewCellAccessoryType.None,mandatory : self.mandatory)
             return
         }
         var item = self.arrayItems[index - 1]
         cell.textLabel?.text = item.title
-        cell.accessoryType = item.selected == true ? UITableViewCellAccessoryType.Checkmark : UITableViewCellAccessoryType.None
+        cell.model = AVBFormCellModel(text: item.title, detailText: nil, accesoryType: item.selected == true ? UITableViewCellAccessoryType.Checkmark : UITableViewCellAccessoryType.None, mandatory: false)
     }
     
     override func didSelectCell(cell : AVBFormTableViewCell, index : Int) {

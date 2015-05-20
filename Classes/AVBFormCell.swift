@@ -9,21 +9,37 @@
 import Foundation
 import UIKit
 
-struct AVBFormTableViewCellOptions {
+
+struct AVBFormCellModel {
+    let text : String?
+    let detailText : String?
+    let accesoryType : UITableViewCellAccessoryType?
+    let mandatory : Bool?
+}
+
+struct AVBFormCellAppearance {
     struct Border {
         let color : UIColor
         let width : CGFloat
     }
-    let text : NSString
-    let detailText : NSString
-    let accesoryType : UITableViewCellAccessoryType?
     let border : Border?
 }
+
 class AVBFormTableViewCell : UITableViewCell {
     
+    lazy var requiredSymbol : UILabel = {
+       var symbol = UILabel(frame: CGRect(x: 5, y: 5, width: 10, height: 10))
+        symbol.backgroundColor = UIColor.clearColor()
+        symbol.text = "*"
+        symbol.sizeToFit()
+        symbol.frame.origin = CGPoint(x: 5, y: 5)
+        symbol.textColor = UIColor.redColor()
+        return symbol
+    }()
     override func prepareForReuse() {
         accessoryType = .None
         textLabel?.text = nil
+        detailTextLabel?.text = nil
     }
     required override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -33,31 +49,50 @@ class AVBFormTableViewCell : UITableViewCell {
         super.init(coder: aDecoder)
     }
     
+    var cellText : String? {
+        get {
+            return textLabel?.text
+        }
+        set(theText) {
+            textLabel?.text = theText
+        }
+    }
+    var detailText : String? {
+        get {
+            return detailTextLabel?.text
+        }
+        set(theText)  {
+            detailTextLabel?.text = theText
+        }
+    }
+    var model = AVBFormCellModel(text: nil, detailText: nil, accesoryType: UITableViewCellAccessoryType.None, mandatory: false) {
+        didSet {
+            cellText = model.text
+            detailText = model.detailText
+            accessoryType = model.accesoryType ?? UITableViewCellAccessoryType.None
+            mandatory = model.mandatory ?? false
+        }
+    }    
     enum Validity {
         case None
         case Valid
         case Invalid
     }
     
-    func markValidState(valid : Validity) {
-        if (valid == Validity.Invalid) {
-            self.contentView.layer.borderColor = UIColor.redColor().CGColor
-            self.contentView.layer.borderWidth = 1
-        } else {
-            self.contentView.layer.borderColor = UIColor.clearColor().CGColor
-            self.contentView.layer.borderWidth = 1
+    private var mandatory = false {
+        didSet {
+            if mandatory == true {
+                contentView.addSubview(requiredSymbol)
+                contentView.bringSubviewToFront(requiredSymbol)
+                requiredSymbol.hidden = false
+            } else {
+                requiredSymbol.hidden = true
+            }
         }
     }
 }
 
-class  AVBFormLeftDetailCell : AVBFormTableViewCell {
-    required init(style: UITableViewCellStyle, reuseIdentifier: String?) {
-        super.init(style: UITableViewCellStyle.Value1, reuseIdentifier: reuseIdentifier)
-    }
-    required init(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-    }
-}
+
 
 class AVBFormDatePickerCell : AVBFormTableViewCell {
     let datePicker = UIDatePicker()

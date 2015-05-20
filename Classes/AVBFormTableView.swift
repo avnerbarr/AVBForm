@@ -32,23 +32,17 @@ class AVBFormTableView : UITableView {
 
     enum CellIdentifiers {
         case Simple
-        case Cell1
-        case Cell2
         case Text
         case DateTime
         case RadioCell
         case RadioHeader
         case Accessory
-        static var values : [CellIdentifiers] { get {return [CellIdentifiers.Simple,CellIdentifiers.Cell1,CellIdentifiers.Cell2,CellIdentifiers.Text,CellIdentifiers.DateTime,CellIdentifiers.RadioCell,CellIdentifiers.RadioHeader,CellIdentifiers.Accessory]}}
+        static var values : [CellIdentifiers] { get {return [CellIdentifiers.Simple,CellIdentifiers.Text,CellIdentifiers.DateTime,CellIdentifiers.RadioCell,CellIdentifiers.RadioHeader,CellIdentifiers.Accessory]}}
         var identifier : String {
             get {
                 switch self {
                 case Simple:
                     return "Simple"
-                case Cell1:
-                    return "cell1"
-                case Cell2:
-                    return "cell2"
                 case Text:
                     return "text"
                 case .DateTime:
@@ -68,8 +62,6 @@ class AVBFormTableView : UITableView {
                 switch self {
                 case Simple:
                     return AVBFormTableViewCell.self
-                case .Cell1, .Cell2:
-                    return AVBFormLeftDetailCell.self
                 case .Text:
                     return AVBInlineTextCell.self
                 case .DateTime:
