@@ -16,8 +16,14 @@
 		851836751AF8F0E600F73D90 /* AVBForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836741AF8F0E600F73D90 /* AVBForm.swift */; };
 		851836771AFA019800F73D90 /* AVBFormViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836761AFA019800F73D90 /* AVBFormViewController.swift */; };
 		851836791AFA0B1000F73D90 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836781AFA0B1000F73D90 /* ViewController.swift */; };
-		8518367B1AFBFD6B00F73D90 /* AVBComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8518367A1AFBFD6B00F73D90 /* AVBComponent.swift */; };
+		8518367B1AFBFD6B00F73D90 /* AVBFormComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8518367A1AFBFD6B00F73D90 /* AVBFormComponent.swift */; };
 		8518367D1AFDF06300F73D90 /* AVBFormCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8518367C1AFDF06300F73D90 /* AVBFormCell.swift */; };
+		8518367F1AFF957C00F73D90 /* UIDatePicker+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8518367E1AFF957C00F73D90 /* UIDatePicker+Extensions.swift */; };
+		851836811AFFA1B300F73D90 /* String+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836801AFFA1B300F73D90 /* String+Extensions.swift */; };
+		851836831AFFB6DA00F73D90 /* AVBFormSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 851836821AFFB6DA00F73D90 /* AVBFormSection.swift */; };
+		85E2659B1B0CB50E00013546 /* AVBFormTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E2659A1B0CB50E00013546 /* AVBFormTableView.swift */; };
+		85E2659D1B0CB82900013546 /* AVBFormController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E2659C1B0CB82900013546 /* AVBFormController.swift */; };
+		85E265A01B0CBA2100013546 /* AVBTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E2659F1B0CBA2100013546 /* AVBTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -29,6 +35,19 @@
 			remoteInfo = AVBForm;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		85B697CA1B08CAB40051922C /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		8518364A1AF8F08800F73D90 /* AVBForm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AVBForm.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -46,8 +65,14 @@
 		851836741AF8F0E600F73D90 /* AVBForm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVBForm.swift; sourceTree = "<group>"; };
 		851836761AFA019800F73D90 /* AVBFormViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AVBFormViewController.swift; path = Classes/AVBFormViewController.swift; sourceTree = "<group>"; };
 		851836781AFA0B1000F73D90 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		8518367A1AFBFD6B00F73D90 /* AVBComponent.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; fileEncoding = 4; name = AVBComponent.swift; path = Classes/AVBComponent.swift; sourceTree = "<group>"; };
+		8518367A1AFBFD6B00F73D90 /* AVBFormComponent.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; fileEncoding = 4; name = AVBFormComponent.swift; path = Classes/AVBFormComponent.swift; sourceTree = "<group>"; };
 		8518367C1AFDF06300F73D90 /* AVBFormCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AVBFormCell.swift; path = Classes/AVBFormCell.swift; sourceTree = "<group>"; };
+		8518367E1AFF957C00F73D90 /* UIDatePicker+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIDatePicker+Extensions.swift"; sourceTree = "<group>"; };
+		851836801AFFA1B300F73D90 /* String+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+Extensions.swift"; sourceTree = "<group>"; };
+		851836821AFFB6DA00F73D90 /* AVBFormSection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AVBFormSection.swift; sourceTree = "<group>"; };
+		85E2659A1B0CB50E00013546 /* AVBFormTableView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AVBFormTableView.swift; path = Classes/AVBFormTableView.swift; sourceTree = "<group>"; };
+		85E2659C1B0CB82900013546 /* AVBFormController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AVBFormController.swift; path = Classes/AVBFormController.swift; sourceTree = "<group>"; };
+		85E2659F1B0CBA2100013546 /* AVBTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AVBTests.swift; path = Classes/AVBTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,9 +96,14 @@
 		851836411AF8F08800F73D90 = {
 			isa = PBXGroup;
 			children = (
+				85E2659E1B0CB8CF00013546 /* Extensions */,
+				85E2659F1B0CBA2100013546 /* AVBTests.swift */,
 				851836761AFA019800F73D90 /* AVBFormViewController.swift */,
-				8518367A1AFBFD6B00F73D90 /* AVBComponent.swift */,
 				851836741AF8F0E600F73D90 /* AVBForm.swift */,
+				85E2659C1B0CB82900013546 /* AVBFormController.swift */,
+				85E2659A1B0CB50E00013546 /* AVBFormTableView.swift */,
+				851836821AFFB6DA00F73D90 /* AVBFormSection.swift */,
+				8518367A1AFBFD6B00F73D90 /* AVBFormComponent.swift */,
 				8518367C1AFDF06300F73D90 /* AVBFormCell.swift */,
 				851836781AFA0B1000F73D90 /* ViewController.swift */,
 				8518364C1AF8F08800F73D90 /* AVBForm */,
@@ -131,6 +161,15 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		85E2659E1B0CB8CF00013546 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				851836801AFFA1B300F73D90 /* String+Extensions.swift */,
+				8518367E1AFF957C00F73D90 /* UIDatePicker+Extensions.swift */,
+			);
+			name = Extensions;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -141,6 +180,7 @@
 				851836461AF8F08800F73D90 /* Sources */,
 				851836471AF8F08800F73D90 /* Frameworks */,
 				851836481AF8F08800F73D90 /* Resources */,
+				85B697CA1B08CAB40051922C /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
@@ -232,11 +272,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				851836791AFA0B1000F73D90 /* ViewController.swift in Sources */,
-				8518367B1AFBFD6B00F73D90 /* AVBComponent.swift in Sources */,
+				8518367B1AFBFD6B00F73D90 /* AVBFormComponent.swift in Sources */,
 				851836771AFA019800F73D90 /* AVBFormViewController.swift in Sources */,
 				8518367D1AFDF06300F73D90 /* AVBFormCell.swift in Sources */,
 				851836751AF8F0E600F73D90 /* AVBForm.swift in Sources */,
+				851836811AFFA1B300F73D90 /* String+Extensions.swift in Sources */,
+				85E265A01B0CBA2100013546 /* AVBTests.swift in Sources */,
+				85E2659D1B0CB82900013546 /* AVBFormController.swift in Sources */,
+				8518367F1AFF957C00F73D90 /* UIDatePicker+Extensions.swift in Sources */,
+				851836831AFFB6DA00F73D90 /* AVBFormSection.swift in Sources */,
 				851836531AF8F08800F73D90 /* AppDelegate.m in Sources */,
+				85E2659B1B0CB50E00013546 /* AVBFormTableView.swift in Sources */,
 				851836501AF8F08800F73D90 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

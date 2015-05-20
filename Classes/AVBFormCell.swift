@@ -9,23 +9,91 @@
 import Foundation
 import UIKit
 
+struct AVBFormTableViewCellOptions {
+    struct Border {
+        let color : UIColor
+        let width : CGFloat
+    }
+    let text : NSString
+    let detailText : NSString
+    let accesoryType : UITableViewCellAccessoryType?
+    let border : Border?
+}
 class AVBFormTableViewCell : UITableViewCell {
-    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
-        super.init(style: UITableViewCellStyle.Value1, reuseIdentifier: reuseIdentifier)
-    }
-
-    required init(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        fatalError("init(coder:) has not been implemented")
-    }
+    
     override func prepareForReuse() {
         accessoryType = .None
         textLabel?.text = nil
     }
+    required override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+    }
+
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    enum Validity {
+        case None
+        case Valid
+        case Invalid
+    }
+    
+    func markValidState(valid : Validity) {
+        if (valid == Validity.Invalid) {
+            self.contentView.layer.borderColor = UIColor.redColor().CGColor
+            self.contentView.layer.borderWidth = 1
+        } else {
+            self.contentView.layer.borderColor = UIColor.clearColor().CGColor
+            self.contentView.layer.borderWidth = 1
+        }
+    }
+}
+
+class  AVBFormLeftDetailCell : AVBFormTableViewCell {
+    required init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        super.init(style: UITableViewCellStyle.Value1, reuseIdentifier: reuseIdentifier)
+    }
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+}
+
+class AVBFormDatePickerCell : AVBFormTableViewCell {
+    let datePicker = UIDatePicker()
+    //MARK: -
+    //MARK: Lifecycle
+    required init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        datePicker.sizeToFit()
+        contentView.addSubview(datePicker)
+    }
+    required init(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    deinit {
+        datePicker.removeTarget(nil, action: nil, forControlEvents: UIControlEvents.AllEvents)
+    }
+    
+    override func prepareForReuse() {
+        datePicker.removeTarget(nil, action: nil, forControlEvents: UIControlEvents.AllEvents)
+    }
+    override func canBecomeFirstResponder() -> Bool {
+        return true
+    }
+    override func canResignFirstResponder() -> Bool {
+        return true
+    }
+    override func becomeFirstResponder() -> Bool {
+        return datePicker.becomeFirstResponder()
+    }
+    override func resignFirstResponder() -> Bool {
+        return datePicker.resignFirstResponder()
+    }
 }
 
 class AVBFormRadioHeaderCell: AVBFormTableViewCell {
-    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+    required init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.textLabel?.backgroundColor = UIColor.clearColor()
         self.contentView.backgroundColor = UIColor.lightGrayColor()
@@ -54,7 +122,12 @@ class AVBFormKeyboardAvoidingCell : AVBFormTableViewCell {
                 while superView != nil {
                     if let superView = superView as? UITableView {
                         superView.contentInset = UIEdgeInsets(top: superView.contentInset.top, left: 0, bottom: superView.contentInset.bottom + kbframe.height, right: 0)
-                        superView.setContentOffset(CGPointMake(0, superView.contentOffset.y + kbframe.height), animated: true)
+                        var duration = (notification.userInfo![UIKeyboardAnimationDurationUserInfoKey] as! NSNumber).doubleValue
+                        
+                        UIView.animateWithDuration(duration, delay: 0, options: UIViewAnimationOptions.CurveEaseInOut, animations: { () -> Void in
+                            superView.contentOffset = CGPointMake(0, superView.contentOffset.y + kbframe.height)
+                        }, completion: nil)
+
                         break
                     }
                     superView = superView?.superview
@@ -95,7 +168,7 @@ protocol AVBFormAccessoryCellDelegate : class {
 class AVBFormAccessoryCell : AVBFormKeyboardAvoidingCell {
     
     weak var accessoryDelegate : AVBFormAccessoryCellDelegate?
-    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+    required init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         super.registerKeyboardListeners()
     }
@@ -120,14 +193,18 @@ class AVBFormAccessoryCell : AVBFormKeyboardAvoidingCell {
     }
 }
 protocol AVBInlineTextCellProtocol {
-    func setValues(label : String , placeholder : String)
+    func setValues(label : String? , placeholder : String?, value : String?)
     func getText()->String
 }
 
 class AVBInlineTextCell : AVBFormKeyboardAvoidingCell,AVBInlineTextCellProtocol {
     let label = UILabel()
-    let textView = UITextView()
-    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+    let textView : UITextField = {
+        var textField = UITextField()
+        textField.textColor = UIColor.blueColor()
+        return textField
+    }()
+    required init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         commonInit()
     }
@@ -137,11 +214,17 @@ class AVBInlineTextCell : AVBFormKeyboardAvoidingCell,AVBInlineTextCellProtocol 
         commonInit()
     }
     
+    override func prepareForReuse() {
+        textView.text = nil
+        textView.placeholder = nil
+    }
+    
     override func layoutSubviews() {
         var r1 = CGRectZero,r2 = CGRectZero
-        CGRectDivide(self.contentView.bounds, &r1, &r2, 30, CGRectEdge.MinXEdge)
+        var size = label.sizeThatFits(self.contentView.bounds.size)
+        CGRectDivide(CGRectInset(self.contentView.bounds, 20, 0), &r1, &r2, size.width, CGRectEdge.MinXEdge)
         label.frame = r1
-        textView.frame = r2
+        textView.frame = CGRectInset(r2, 10, 0)
     }
     func commonInit() {
         
@@ -151,9 +234,15 @@ class AVBInlineTextCell : AVBFormKeyboardAvoidingCell,AVBInlineTextCellProtocol 
     }
     
     
-    func setValues(label : String , placeholder : String) {
+    func setValues(label : String? , placeholder : String?, value : String?) {
         self.label.text = label
-        self.textView.text = placeholder
+        if value != nil {
+            self.textView.text = value
+        } else {
+            self.textView.text = nil
+            self.textView.placeholder = placeholder
+        }
+        layoutSubviews()
     }
     
     func getText()->String {

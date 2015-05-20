@@ -13,74 +13,68 @@ import UIKit
 *  Defines functionality the form needs from the controller
 */
 protocol AVBFormProtocol : class {
-    func needsGroupReload(form : AVBForm , group : AVBComponentGroup)
+    func needsGroupReload(form : AVBForm , group : AVBFormSection)
 }
 
+protocol AVBValidatable {
+    func isValid()->Bool
+    func markInvalid()
+}
 
-class AVBForm {
-    let schemes : [AVBComponentGroup]
-    weak var delegate : AVBFormProtocol?
-    weak var tableView : AVBFormTableView?
-    lazy var dataSource : AVBFormDataSource? = {
+protocol AVBFormDelegate : class {
+    func presentChildForm(form : AVBForm)
+}
+
+class AVBForm : AVBValidatable {
+    let groups : [AVBFormSection]
+    weak var formDelegate : AVBFormDelegate?
+    weak var tableView : AVBFormTableView? {
+        didSet {
+            tableView?.delegate = self.dataSource
+            tableView?.dataSource = self.dataSource
+            tableView?.reloadData()
+        }
+    }
+    lazy var dataSource : AVBFormController? = {
         if let tableView = self.tableView {
-            return AVBFormDataSource(tableView: tableView, form: self)
+            return AVBFormController(tableView: tableView, form: self)
         }
         return nil
     }()
-    subscript(index : Int) -> AVBComponentGroup? {
-        if schemes.count > index {
-            return schemes[index]
+    subscript(index : Int) -> AVBFormSection? {
+        if groups.count > index {
+            return groups[index]
         }
         return nil
     }
-    init(groups : [AVBComponentGroup],tableView : AVBFormTableView) {
-        self.schemes = groups
+    init(groups : [AVBFormSection],tableView : AVBFormTableView?) {
+        self.groups = groups
         self.tableView = tableView
-        for group in schemes {
+        for group in groups {
             group.form = self
         }
         self.tableView?.delegate = self.dataSource
         self.tableView?.dataSource = self.dataSource
     }
+    func isValid()->Bool {
+        var valid = true
+        for group in groups {
+            valid = valid && group.isValid()
+            if valid == false {
+                return false
+            }
+        }
+        return true
+    }
+    func presentChildForm(form : AVBForm) {
+        self.formDelegate?.presentChildForm(form)
+    }
+    
+    func markInvalid() {
+        
+    }
 }
 
-@objc class AVBFormDataSource : NSObject, UITableViewDataSource, UITableViewDelegate, AVBFormProtocol {
-    private weak var tableView : AVBFormTableView!
-    private(set) var form : AVBForm!
-    init(tableView : AVBFormTableView, form : AVBForm) {
-        super.init()
-        self.tableView = tableView
-        self.form = form
-        self.form.delegate = self
-    }
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return form.schemes.count
-    }
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        return self.form[indexPath.section]!.cellForRowAtIndex(indexPath, tableView: self.tableView)!
-    }
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if let sec = self.form[section] {
-            return sec.numberOfRows
-        }
-        return 0
-    }
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return self.form[section]?.title
-    }
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        self.form[indexPath.section]?.didSelectRowAtIndexPath(tableView as! AVBFormTableView, indexPath: indexPath)
-    }
-    
-    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return self.form[indexPath.section]?.heightForRowAtIndexPath(indexPath, tableView: tableView as! AVBFormTableView) ?? 44.0
-    }
-    func needsGroupReload(form : AVBForm , group : AVBComponentGroup) {
-        var index = (form.schemes as NSArray).indexOfObject(group)
-        self.tableView.reloadSections(NSIndexSet(index: index), withRowAnimation: UITableViewRowAnimation.Automatic)
-    }
-    
-}
 
 extension UIView {
     var keyWindowFrame : CGRect? {
