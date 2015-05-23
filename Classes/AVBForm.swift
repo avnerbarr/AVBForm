@@ -16,9 +16,14 @@ protocol AVBFormProtocol : class {
     func needsGroupReload(form : AVBForm , group : AVBFormSection)
 }
 
+enum Mode {
+    case Normal
+    case Validate
+}
 protocol AVBValidatable {
     func isValid()->Bool
     func markInvalid()
+    var mode : Mode {get set}
 }
 
 protocol AVBFormDelegate : class {
@@ -71,7 +76,19 @@ class AVBForm : AVBValidatable {
     }
     
     func markInvalid() {
-        
+        for group in groups {
+            group.markInvalid()
+        }
+    }
+    
+    
+    var mode = Mode.Normal {
+        didSet {
+            for group in groups {
+                group.mode = mode
+            }
+            self.tableView?.reloadData()
+        }
     }
 }
 

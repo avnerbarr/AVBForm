@@ -23,15 +23,15 @@ struct DateOptions {
 }
 
 extension UIDatePicker {
-    var dateOptions : DateOptions {
+    var dateOptions : DateOptions? {
         set(newValue) {
-            self.datePickerMode = newValue.datePickerMode
-            self.locale = newValue.locale
-            self.calendar = newValue.calendar
-            self.timeZone = newValue.timeZone
-            self.date = newValue.date ?? NSDate.new()
-            self.minimumDate = newValue.minimumDate
-            self.maximumDate = newValue.maximumDate
+            self.datePickerMode = newValue?.datePickerMode ?? UIDatePickerMode.DateAndTime
+            self.locale = newValue?.locale
+            self.calendar = newValue?.calendar ?? nil
+            self.timeZone = newValue?.timeZone
+            self.date = newValue?.date ?? NSDate.new()
+            self.minimumDate = newValue?.minimumDate
+            self.maximumDate = newValue?.maximumDate
         }
         get {
             return DateOptions(datePickerMode: self.datePickerMode, locale: self.locale, calendar: self.calendar, timeZone: self.timeZone, date: self.date, minimumDate: self.minimumDate, maximumDate: self.maximumDate)

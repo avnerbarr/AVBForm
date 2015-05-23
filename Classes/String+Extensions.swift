@@ -13,6 +13,6 @@ extension String {
         if str == nil {
             return true
         }
-        return (str! as NSString).length != 0
+        return (str! as NSString).length == 0
     }
 }

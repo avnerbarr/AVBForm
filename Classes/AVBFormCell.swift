@@ -9,12 +9,38 @@
 import Foundation
 import UIKit
 
-
-struct AVBFormCellModel {
+protocol AVBFormCellModelProtocol {
+    
+}
+struct AVBFormCellModel : AVBFormCellModelProtocol {
     let text : String?
     let detailText : String?
     let accesoryType : UITableViewCellAccessoryType?
     let mandatory : Bool?
+}
+
+struct AVBFormCellTextInputModel : AVBFormCellModelProtocol {
+    let label : String?
+    let placeholder : String?
+    let value : String?
+    let keyboardType : UIKeyboardType?
+    let target : Target?
+}
+
+struct AVBFormCellDatePickerModel : AVBFormCellModelProtocol {
+    let target : Target?
+    let dateOptions : DateOptions?
+}
+
+struct AVBFormCellAccessoryCellModel : AVBFormCellModelProtocol {
+    var accessoryDelegate : AVBFormAccessoryCellDelegate?
+    let text : String?
+    let detailText : String?
+}
+struct Target {
+    var target : AnyObject?
+    let action : Selector
+    let controlEvents : UIControlEvents
 }
 
 struct AVBFormCellAppearance {
@@ -22,12 +48,15 @@ struct AVBFormCellAppearance {
         let color : UIColor
         let width : CGFloat
     }
+    let textColor : UIColor?
+    let detailColor : UIColor?
+    let backGroundColor : UIColor?
     let border : Border?
 }
 
 class AVBFormTableViewCell : UITableViewCell {
     
-    lazy var requiredSymbol : UILabel = {
+    private lazy var requiredSymbol : UILabel = {
        var symbol = UILabel(frame: CGRect(x: 5, y: 5, width: 10, height: 10))
         symbol.backgroundColor = UIColor.clearColor()
         symbol.text = "*"
@@ -37,9 +66,11 @@ class AVBFormTableViewCell : UITableViewCell {
         return symbol
     }()
     override func prepareForReuse() {
+        super.prepareForReuse()
         accessoryType = .None
         textLabel?.text = nil
         detailTextLabel?.text = nil
+        appearance = nil
     }
     required override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -65,14 +96,27 @@ class AVBFormTableViewCell : UITableViewCell {
             detailTextLabel?.text = theText
         }
     }
-    var model = AVBFormCellModel(text: nil, detailText: nil, accesoryType: UITableViewCellAccessoryType.None, mandatory: false) {
+    var model : AVBFormCellModelProtocol? = AVBFormCellModel(text: nil, detailText: nil, accesoryType: UITableViewCellAccessoryType.None, mandatory: false) {
         didSet {
-            cellText = model.text
-            detailText = model.detailText
-            accessoryType = model.accesoryType ?? UITableViewCellAccessoryType.None
-            mandatory = model.mandatory ?? false
+            if let model = model as? AVBFormCellModel? {
+                cellText = model?.text ?? nil
+                detailText = model?.detailText ?? nil
+                accessoryType = model?.accesoryType ?? UITableViewCellAccessoryType.None
+                mandatory = model?.mandatory ?? false
+            }
+            
         }
-    }    
+    }
+    var appearance : AVBFormCellAppearance? = AVBFormCellAppearance(textColor: nil, detailColor: nil, backGroundColor: nil, border: nil) {
+        didSet {
+            backgroundColor = appearance?.backGroundColor
+            textLabel?.textColor = appearance?.textColor
+            detailTextLabel?.textColor = appearance?.detailColor
+            layer.borderWidth = appearance?.border?.width ?? 0
+            layer.borderColor = appearance?.border?.color.CGColor ?? UIColor.clearColor().CGColor
+        }
+        
+    }
     enum Validity {
         case None
         case Valid
@@ -111,6 +155,7 @@ class AVBFormDatePickerCell : AVBFormTableViewCell {
     }
     
     override func prepareForReuse() {
+        super.prepareForReuse()
         datePicker.removeTarget(nil, action: nil, forControlEvents: UIControlEvents.AllEvents)
     }
     override func canBecomeFirstResponder() -> Bool {
@@ -124,6 +169,17 @@ class AVBFormDatePickerCell : AVBFormTableViewCell {
     }
     override func resignFirstResponder() -> Bool {
         return datePicker.resignFirstResponder()
+    }
+    override var model : AVBFormCellModelProtocol? {
+        didSet {
+            if let model = model as? AVBFormCellDatePickerModel, target = model.target {
+                datePicker.addTarget(target.target, action: target.action, forControlEvents: target.controlEvents)
+                datePicker.dateOptions = model.dateOptions
+            } else {
+                datePicker.removeTarget(nil, action: nil, forControlEvents: nil)
+                datePicker.dateOptions = nil
+            }
+        }
     }
 }
 
@@ -226,6 +282,15 @@ class AVBFormAccessoryCell : AVBFormKeyboardAvoidingCell {
             return self.accessoryDelegate?.accessoryView(self)
         }
     }
+    override var model : AVBFormCellModelProtocol? {
+        didSet {
+            if let model = model as? AVBFormCellAccessoryCellModel {
+                accessoryDelegate = model.accessoryDelegate
+                detailText = model.detailText
+                textLabel?.text = model.text
+            }
+        }
+    }
 }
 protocol AVBInlineTextCellProtocol {
     func setValues(label : String? , placeholder : String?, value : String?)
@@ -250,6 +315,7 @@ class AVBInlineTextCell : AVBFormKeyboardAvoidingCell,AVBInlineTextCellProtocol 
     }
     
     override func prepareForReuse() {
+        super.prepareForReuse()
         textView.text = nil
         textView.placeholder = nil
     }
@@ -268,7 +334,19 @@ class AVBInlineTextCell : AVBFormKeyboardAvoidingCell,AVBInlineTextCellProtocol 
         self.registerKeyboardListeners()
     }
     
-    
+    override var model : AVBFormCellModelProtocol? {
+        didSet {
+            if let model = model as? AVBFormCellTextInputModel {
+                self.setValues(model.label, placeholder: model.placeholder, value: model.value)
+                self.textView.keyboardType = model.keyboardType ?? UIKeyboardType.Default
+                if model.target != nil {
+                    self.textView.addTarget(model.target?.target, action: model.target!.action, forControlEvents: model.target!.controlEvents)
+                } else {
+                    self.textView.removeTarget(nil, action: nil, forControlEvents: nil)
+                }                
+            }
+        }
+    }
     func setValues(label : String? , placeholder : String?, value : String?) {
         self.label.text = label
         if value != nil {

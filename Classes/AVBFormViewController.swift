@@ -44,10 +44,11 @@ class AVBFormViewController: UIViewController, AVBFormDelegate {
     
     @IBAction func validateForm(sender: UIBarButtonItem) {
         if self.form?.isValid() == true {
-            
+            println("Valid")
         } else {
-            
+            println("Invalid")
         }
+        self.form?.mode = Mode.Validate
     }
     
     func validateForm() -> Bool? {

@@ -34,10 +34,6 @@ func makeTestForm(tableView : AVBFormTableView) -> AVBForm {
         radio.title = "Radio Group"
         radio.stateChanged = {(component : AVBComponent,state : AVBState) in
             if let component = component as? AVBInlineRadioComponent {
-                for item in component.arrayItems {
-                    println(item.title! + " " + item.id! + " " + item.selected.description )
-                }
-                
                 if let parent = component.parent {
                     var newRadio = AVBInlineRadioComponent(
                         items: [
@@ -48,10 +44,12 @@ func makeTestForm(tableView : AVBFormTableView) -> AVBForm {
                         ]
                     )
                     newRadio.title = "New Radio"
+                    newRadio.identifier = "Swapped radio group"
                     parent.replace(component, newComponent: newRadio)
+                    println("Swapped out component")
                 }
             }
-            println("Changed")
+            
         }
         return radio
     }
@@ -114,8 +112,8 @@ func makeTestForm(tableView : AVBFormTableView) -> AVBForm {
         }
         return fullScreen
     }
-    var firstGroup = AVBFormSection(title : "Group 1", schemes : [fullScreen(),multiSelect(),radio()])
-    var secondGroup = AVBFormSection(title : "Group 1", schemes : [multiSelect(),radio()])
+    var firstGroup = AVBFormSection(title : "Section 1", schemes : [fullScreen(),multiSelect(),radio()])
+    var secondGroup = AVBFormSection(title : "Section 2", schemes : [multiSelect(),radio()])
     
     var scheme = AVBInlineTextComponent(
         options: AVBInlineTextComponent.Options(
@@ -125,10 +123,10 @@ func makeTestForm(tableView : AVBFormTableView) -> AVBForm {
         )
     )
     scheme.title = "Insert text"
-    var thirdGroup = AVBFormSection(title: nil, schemes: [scheme])
+    var thirdGroup = AVBFormSection(title: "Text Section", schemes: [scheme])
     
     var accordione = AVBAccordioneComponent(component: radio())
     accordione.title = "Accordione"
-    var forthGroup = AVBFormSection(title: "Accordione Group", schemes: [accordione,accessory(),datePicker()])
+    var forthGroup = AVBFormSection(title: "Section with an accordion", schemes: [accordione,accessory(),datePicker()])
     return AVBForm(groups : [firstGroup,secondGroup,thirdGroup,forthGroup],tableView : tableView)
 }

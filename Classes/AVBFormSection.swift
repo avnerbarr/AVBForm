@@ -137,8 +137,12 @@ class AVBFormSection : AVBFormSectionParentProtocol , AVBValidatable {
         updateInternals()
     }
     func cellForComponent(component : AVBComponent) -> AVBFormTableViewCell? {
+        var section = find(self.form!.groups, self)
         if let visible = self.form?.tableView?.indexPathsForVisibleRows() as? [NSIndexPath] {
             for index in visible {
+                if index.section != section {
+                    continue
+                }
                 if let map = internalIndexMap(index) {
                     if map.scheme == component {
                         return self.form?.tableView?.cellForRowAtIndexPath(index) as? AVBFormTableViewCell
@@ -168,6 +172,19 @@ class AVBFormSection : AVBFormSectionParentProtocol , AVBValidatable {
             component.markInvalid()
         }
     }
+    
+    var mode = Mode.Normal {
+        didSet {
+            for component in components {
+                component.mode = mode
+            }
+        }
+    }
+}
+
+extension AVBFormSection : Equatable {}
+func ==(lhs : AVBFormSection, rhs: AVBFormSection) -> Bool {
+    return lhs===rhs
 }
 
 /**

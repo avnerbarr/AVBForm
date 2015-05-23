@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 
+let lightRedColor = UIColor(red: 249/255, green: 220/255, blue: 222/255, alpha: 1)
 struct AVBState {
     
 }
@@ -43,6 +44,11 @@ class AVBComponent :   AVBComponentSectionProtocol,AVBValidatable {
     
     /// Weak reference to the parent group
     weak var parent : AVBFormSection?
+    
+    deinit {
+        println("deinit")
+    }
+    
     func numberOfRows() -> Int {return 0}
     func needsReload() {
         self.parent?.needsReload(self)
@@ -50,11 +56,18 @@ class AVBComponent :   AVBComponentSectionProtocol,AVBValidatable {
     func needsUpdateRowCount() {
         self.parent?.needsUpdateRowCount(self)
     }
+    
+    func model(index : Int) -> AVBFormCellModelProtocol? {
+        return nil
+    }
     //MARK: AVBComponentGroupProtocol
     func cellIdentifierForIndex(index : Int) -> AVBFormTableView.CellIdentifiers {
         return AVBFormTableView.CellIdentifiers.Simple
     }
-    func prepareCell(cell : AVBFormTableViewCell, index : Int) {}
+    final func prepareCell(cell : AVBFormTableViewCell, index : Int) {
+        var model = self.model(index)
+        cell.model = model
+    }
     func didSelectCell(cell : AVBFormTableViewCell, index : Int) {}
     func heightForRowAtIndex(index : Int) -> CGFloat {return 44.0}
     
@@ -63,8 +76,19 @@ class AVBComponent :   AVBComponentSectionProtocol,AVBValidatable {
         return true
     }
     func markInvalid() {
-        
+        if let cell = self.parent?.cellForComponent(self) {
+            var appearance = cell.appearance
+            if self.isValid() == false {
+                cell.appearance = invalidAppearance
+            } else {
+                cell.appearance = normalAppearance
+            }
+        }
     }
+    
+    let normalAppearance = AVBFormCellAppearance(textColor: nil, detailColor: nil, backGroundColor: UIColor.whiteColor(), border: nil)
+    let invalidAppearance = AVBFormCellAppearance(textColor: nil, detailColor: nil, backGroundColor: lightRedColor, border: nil)
+    var mode = Mode.Normal
 }
 
 extension AVBComponent : Equatable {
@@ -91,10 +115,9 @@ class AVBFullScreenComponent : AVBComponent {
     override func cellIdentifierForIndex(index: Int) -> AVBFormTableView.CellIdentifiers {
         return AVBFormTableView.CellIdentifiers.Simple
     }
-    override func prepareCell(cell: AVBFormTableViewCell, index: Int) {
-        cell.textLabel?.text = self.title
-        cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
-        cell.detailTextLabel?.text = detailText
+    
+    override func model(index: Int) -> AVBFormCellModelProtocol? {
+        return AVBFormCellModel(text : title,detailText : detailText,accesoryType :  UITableViewCellAccessoryType.DisclosureIndicator, mandatory : mandatory)
     }
     override func didSelectCell(cell: AVBFormTableViewCell, index: Int) {
         var group = AVBFormSection(title: "Test", schemes: [childComponent])
@@ -160,14 +183,12 @@ class AVBInlineArrayComponent : AVBComponent {
     override func cellIdentifierForIndex(index : Int) -> AVBFormTableView.CellIdentifiers {
         return AVBFormTableView.CellIdentifiers.Simple
     }
-    override func prepareCell(cell : AVBFormTableViewCell, index : Int) {
+    override func model(index: Int) -> AVBFormCellModelProtocol? {
         if index == 0 {
-            cell.model = AVBFormCellModel(text : self.title,detailText : nil, accesoryType : UITableViewCellAccessoryType.None,mandatory : self.mandatory)
-            return
+            return AVBFormCellModel(text : self.title,detailText : nil, accesoryType : UITableViewCellAccessoryType.None,mandatory : self.mandatory)
         }
         var item = self.arrayItems[index - 1]
-        cell.textLabel?.text = item.title
-        cell.model = AVBFormCellModel(text: item.title, detailText: nil, accesoryType: item.selected == true ? UITableViewCellAccessoryType.Checkmark : UITableViewCellAccessoryType.None, mandatory: false)
+        return AVBFormCellModel(text: item.title, detailText: nil, accesoryType: item.selected == true ? UITableViewCellAccessoryType.Checkmark : UITableViewCellAccessoryType.None, mandatory: false)
     }
     
     override func didSelectCell(cell : AVBFormTableViewCell, index : Int) {
@@ -181,7 +202,6 @@ class AVBInlineArrayComponent : AVBComponent {
         item.selected = !item.selected
         self.arrayItems[index - 1] = item
         prepareCell(cell, index: index)
-        stateChanged?(component : self,state: AVBState())
     }
     //MARK: AVBValidatable
     override func isValid() -> Bool {
@@ -263,13 +283,18 @@ class AVBInlineTextComponent : AVBComponent {
     override func numberOfRows() -> Int {
         return 1
     }
-    override func prepareCell(var cell: AVBFormTableViewCell, index: Int) {
-        if let cell = cell as? AVBInlineTextCell {
-            cell.setValues(self.title!, placeholder: options.placeHolderText, value: options.initialValue)
-            cell.textView.addTarget(self, action: "textFieldDidChangeValue:", forControlEvents: UIControlEvents.EditingChanged)
-            cell.textView.keyboardType = options.keypad
-        }
+    override func model(index: Int) -> AVBFormCellModelProtocol? {
+
+        var model = AVBFormCellTextInputModel(
+            label : self.title,
+            placeholder : options.placeHolderText,
+            value : options.initialValue,
+            keyboardType : options.keypad,
+            target : Target(target : self, action : "textFieldDidChangeValue:", controlEvents : UIControlEvents.EditingChanged)
+            )
+        return model
     }
+
     override func cellIdentifierForIndex(index: Int) -> AVBFormTableView.CellIdentifiers {
         return AVBFormTableView.CellIdentifiers.Text
     }
@@ -280,6 +305,7 @@ class AVBInlineTextComponent : AVBComponent {
     override func isValid() -> Bool {
         return !String.isEmptyOrNil(options.initialValue)
     }
+    
 }
 
 //MARK: -
@@ -314,13 +340,10 @@ class AVBInlineDateComponent : AVBComponent ,AVBDateProtocol {
     override func cellIdentifierForIndex(index: Int) -> AVBFormTableView.CellIdentifiers {
         return AVBFormTableView.CellIdentifiers.DateTime
     }
-    override func prepareCell(cell: AVBFormTableViewCell, index: Int) {
-
-        if let cell = cell as? AVBFormDatePickerCell {
-            cell.datePicker.addTarget(self, action: "datePickerDidChangeValue:", forControlEvents: UIControlEvents.ValueChanged)
-            cell.datePicker.dateOptions = self.dateOptions
-        }
-
+    override func model(index: Int) -> AVBFormCellModelProtocol? {
+        var target = Target(target : self,action : "datePickerDidChangeValue:", controlEvents : UIControlEvents.ValueChanged)
+        var model = AVBFormCellDatePickerModel(target : target , dateOptions : self.dateOptions)
+        return model
     }
     
     @objc func datePickerDidChangeValue(picker : UIDatePicker) {
@@ -390,14 +413,13 @@ class AVBAccordioneComponent : AVBCompositeComponent {
         }
         return childComponent!.cellIdentifierForIndex(index-1)
     }
-    override func prepareCell(cell: AVBFormTableViewCell, index: Int) {
-        if index == 0 {
-            cell.textLabel?.text = title
-            cell.detailTextLabel?.text = detailText
-            return
+    override func model(index: Int) -> AVBFormCellModelProtocol? {
+        if (index == 0) {
+            return AVBFormCellModel(text : title, detailText  : detailText, accesoryType : UITableViewCellAccessoryType.None, mandatory : self.childComponent?.mandatory)
         }
-        childComponent!.prepareCell(cell, index: index-1)
+        return childComponent?.model(index-1)
     }
+
     override func didSelectCell(cell: AVBFormTableViewCell, index: Int) {
         if index == 0 {
             folded = !folded
@@ -437,12 +459,9 @@ class AVBDateAccessoryComponent : AVBComponent , AVBFormAccessoryCellDelegate,AV
     required init(options : DateOptions) {
         self.dateOptions = options
     }
-    override func prepareCell(cell: AVBFormTableViewCell, index: Int) {
-        if let cell = cell as? AVBFormAccessoryCell {
-            cell.accessoryDelegate = self
-        }
-        cell.textLabel?.text = self.title
-        cell.detailTextLabel?.text = date?.description
+    
+    override func model(index: Int) -> AVBFormCellModelProtocol? {
+        return AVBFormCellAccessoryCellModel(accessoryDelegate : self,text : self.title,detailText : date?.description)
     }
     
     override func didSelectCell(cell: AVBFormTableViewCell, index: Int) {
