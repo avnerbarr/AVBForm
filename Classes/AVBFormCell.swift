@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 
 protocol AVBFormCellModelProtocol {
-    
+
 }
 struct AVBFormCellModel : AVBFormCellModelProtocol {
     let text : String?
@@ -25,17 +25,20 @@ struct AVBFormCellTextInputModel : AVBFormCellModelProtocol {
     let value : String?
     let keyboardType : UIKeyboardType?
     let target : Target?
+    let mandatory : Bool?
 }
 
 struct AVBFormCellDatePickerModel : AVBFormCellModelProtocol {
     let target : Target?
     let dateOptions : DateOptions?
+    let mandatory : Bool?
 }
 
 struct AVBFormCellAccessoryCellModel : AVBFormCellModelProtocol {
     var accessoryDelegate : AVBFormAccessoryCellDelegate?
     let text : String?
     let detailText : String?
+    let mandatory : Bool?
 }
 struct Target {
     var target : AnyObject?
@@ -288,6 +291,7 @@ class AVBFormAccessoryCell : AVBFormKeyboardAvoidingCell {
                 accessoryDelegate = model.accessoryDelegate
                 detailText = model.detailText
                 textLabel?.text = model.text
+                mandatory = model.mandatory ?? false
             }
         }
     }
@@ -343,7 +347,8 @@ class AVBInlineTextCell : AVBFormKeyboardAvoidingCell,AVBInlineTextCellProtocol 
                     self.textView.addTarget(model.target?.target, action: model.target!.action, forControlEvents: model.target!.controlEvents)
                 } else {
                     self.textView.removeTarget(nil, action: nil, forControlEvents: nil)
-                }                
+                }
+                mandatory = model.mandatory ?? false
             }
         }
     }

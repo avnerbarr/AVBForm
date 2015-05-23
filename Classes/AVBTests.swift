@@ -80,8 +80,9 @@ func makeTestForm(tableView : AVBFormTableView) -> AVBForm {
     }
     func accessory () -> AVBDateAccessoryComponent {
         var accessory = AVBDateAccessoryComponent(options: DateOptions.new())
-        accessory.title = "Accessory"
+        accessory.title = "Accessory Date"
         accessory.labelStyle = UITableViewCellStyle.Value1
+        accessory.mandatory = true
         return accessory
     }
     
@@ -89,7 +90,7 @@ func makeTestForm(tableView : AVBFormTableView) -> AVBForm {
         var date = AVBInlineDateComponent(options: DateOptions.new())
         date.labelStyle = UITableViewCellStyle.Subtitle
         var accordion = AVBAccordioneComponent(component: date)
-        accordion.title = "Choose date"
+        accordion.title = "Accordion inline choose date"
         accordion.labelStyle = UITableViewCellStyle.Subtitle
         return accordion
     }
@@ -126,7 +127,7 @@ func makeTestForm(tableView : AVBFormTableView) -> AVBForm {
     var thirdGroup = AVBFormSection(title: "Text Section", schemes: [scheme])
     
     var accordione = AVBAccordioneComponent(component: radio())
-    accordione.title = "Accordione"
+    accordione.title = "Accordione Radio Group"
     var forthGroup = AVBFormSection(title: "Section with an accordion", schemes: [accordione,accessory(),datePicker()])
     return AVBForm(groups : [firstGroup,secondGroup,thirdGroup,forthGroup],tableView : tableView)
 }

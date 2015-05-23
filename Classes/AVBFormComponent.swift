@@ -67,6 +67,12 @@ class AVBComponent :   AVBComponentSectionProtocol,AVBValidatable {
     final func prepareCell(cell : AVBFormTableViewCell, index : Int) {
         var model = self.model(index)
         cell.model = model
+        var appearance = normalAppearance
+
+        if mode == Mode.Validate && isValid() == false {
+            appearance = invalidAppearance
+        }
+        cell.appearance = appearance
     }
     func didSelectCell(cell : AVBFormTableViewCell, index : Int) {}
     func heightForRowAtIndex(index : Int) -> CGFloat {return 44.0}
@@ -88,7 +94,11 @@ class AVBComponent :   AVBComponentSectionProtocol,AVBValidatable {
     
     let normalAppearance = AVBFormCellAppearance(textColor: nil, detailColor: nil, backGroundColor: UIColor.whiteColor(), border: nil)
     let invalidAppearance = AVBFormCellAppearance(textColor: nil, detailColor: nil, backGroundColor: lightRedColor, border: nil)
-    var mode = Mode.Normal
+    var mode = Mode.Normal {
+        didSet {
+            
+        }
+    }
 }
 
 extension AVBComponent : Equatable {
@@ -120,7 +130,7 @@ class AVBFullScreenComponent : AVBComponent {
         return AVBFormCellModel(text : title,detailText : detailText,accesoryType :  UITableViewCellAccessoryType.DisclosureIndicator, mandatory : mandatory)
     }
     override func didSelectCell(cell: AVBFormTableViewCell, index: Int) {
-        var group = AVBFormSection(title: "Test", schemes: [childComponent])
+        var group = AVBFormSection(title: "", schemes: [childComponent])
         var form = AVBForm(groups: [group], tableView: nil)
         self.parent?.form?.presentChildForm(form)
     }
@@ -290,7 +300,8 @@ class AVBInlineTextComponent : AVBComponent {
             placeholder : options.placeHolderText,
             value : options.initialValue,
             keyboardType : options.keypad,
-            target : Target(target : self, action : "textFieldDidChangeValue:", controlEvents : UIControlEvents.EditingChanged)
+            target : Target(target : self, action : "textFieldDidChangeValue:", controlEvents : UIControlEvents.EditingChanged),
+            mandatory : self.mandatory
             )
         return model
     }
@@ -342,7 +353,7 @@ class AVBInlineDateComponent : AVBComponent ,AVBDateProtocol {
     }
     override func model(index: Int) -> AVBFormCellModelProtocol? {
         var target = Target(target : self,action : "datePickerDidChangeValue:", controlEvents : UIControlEvents.ValueChanged)
-        var model = AVBFormCellDatePickerModel(target : target , dateOptions : self.dateOptions)
+        var model = AVBFormCellDatePickerModel(target : target , dateOptions : self.dateOptions,mandatory : self.mandatory)
         return model
     }
     
@@ -435,6 +446,9 @@ class AVBAccordioneComponent : AVBCompositeComponent {
         }
         return childComponent!.heightForRowAtIndex(index-1)
     }
+    override func isValid() -> Bool {
+        return self.childComponent?.isValid() ?? true
+    }
 }
 
 //MARK: -
@@ -461,7 +475,7 @@ class AVBDateAccessoryComponent : AVBComponent , AVBFormAccessoryCellDelegate,AV
     }
     
     override func model(index: Int) -> AVBFormCellModelProtocol? {
-        return AVBFormCellAccessoryCellModel(accessoryDelegate : self,text : self.title,detailText : date?.description)
+        return AVBFormCellAccessoryCellModel(accessoryDelegate : self,text : self.title,detailText : date?.description,mandatory : self.mandatory)
     }
     
     override func didSelectCell(cell: AVBFormTableViewCell, index: Int) {
